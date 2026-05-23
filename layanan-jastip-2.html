@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Titip.id — Jasa Titip Lokal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+  :root {
+    --hijau: #1a6b2f;
+    --hijau-medium: #2d8a47;
+    --hijau-light: #e8f5ec;
+    --hijau-muda: #4caf70;
+    --kuning: #f5c842;
+    --dark: #0f1f14;
+    --slate: #4a6355;
+    --light-bg: #f4faf6;
+    --krem: #fafdf8;
+    --border: #d0e8d8;
+    --white: #ffffff;
+    --shadow-sm: 0 2px 8px rgba(26,107,47,0.06);
+    --shadow-md: 0 8px 28px rgba(26,107,47,0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--krem);
+    color: var(--dark);
+    padding-bottom: 80px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  nav {
+    background: var(--white);
+    padding: 0.85rem 1.25rem;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1.5px solid var(--border);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .brand-logo { display: flex; align-items: center; gap: 0.55rem; }
+  .logo-svg { width: 44px; height: 44px; flex-shrink: 0; }
+  .brand-text { display: flex; flex-direction: column; line-height: 1; }
+  .brand-name { font-size: 1.55rem; font-weight: 900; color: var(--hijau); letter-spacing: -1px; line-height: 1; }
+  .brand-name span { color: var(--kuning); }
+  .brand-tagline { font-size: 0.6rem; font-weight: 700; color: var(--slate); letter-spacing: 0.3px; text-transform: uppercase; margin-top: 2px; }
+
+  .area-badge {
+    font-size: 0.62rem; font-weight: 700;
+    background: var(--hijau-light); color: var(--hijau);
+    padding: 0.3rem 0.65rem; border-radius: 50px;
+    border: 1px solid rgba(26,107,47,0.2);
+    text-align: right; line-height: 1.4;
+  }
+
+  .container { max-width: 500px; margin: 0 auto; padding: 1.25rem; }
+
+  .hero-banner {
+    background: linear-gradient(135deg, var(--hijau) 0%, #2d8a47 60%, #3da85c 100%);
+    color: var(--white); padding: 1.5rem 1.4rem; border-radius: 22px;
+    margin-bottom: 1.5rem; position: relative; overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+  .hero-banner::before { content: ''; position: absolute; right: -30px; top: -30px; width: 130px; height: 130px; background: rgba(255,255,255,0.07); border-radius: 50%; }
+  .hero-banner::after  { content: ''; position: absolute; right: 30px; bottom: -40px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%; }
+  .hero-badge { display: inline-block; background: var(--kuning); color: var(--dark); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.2rem 0.6rem; border-radius: 50px; margin-bottom: 0.55rem; }
+  .hero-banner h2 { font-size: 1.3rem; font-weight: 900; margin-bottom: 0.3rem; line-height: 1.25; position: relative; z-index: 1; }
+  .hero-banner p { font-size: 0.79rem; opacity: 0.88; line-height: 1.5; max-width: 85%; position: relative; z-index: 1; }
+  .hero-icon { position: absolute; right: 16px; bottom: 12px; font-size: 3.2rem; opacity: 0.25; z-index: 0; }
+
+  .features-strip { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .features-strip::-webkit-scrollbar { display: none; }
+  .feat-chip { display: flex; align-items: center; gap: 0.3rem; background: var(--white); border: 1.5px solid var(--border); border-radius: 50px; padding: 0.35rem 0.75rem; font-size: 0.7rem; font-weight: 700; color: var(--slate); white-space: nowrap; flex-shrink: 0; box-shadow: var(--shadow-sm); }
+  .feat-chip .dot { width: 7px; height: 7px; background: var(--hijau-muda); border-radius: 50%; }
+
+  .section-title { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--slate); margin: 1.5rem 0 0.75rem; }
+
+  .menu-card {
+    background: var(--white); border: 1.5px solid var(--border); border-radius: 20px;
+    padding: 1.25rem 1rem; display: flex; flex-direction: column;
+    align-items: center; text-align: center; cursor: pointer;
+    font-family: inherit; transition: all 0.22s ease;
+    box-shadow: var(--shadow-sm); position: relative; overflow: hidden; width: 100%;
+  }
+  .menu-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 20px 20px 0 0; background: var(--kuning); }
+  .menu-card:active { transform: scale(0.97); border-color: var(--hijau-muda); box-shadow: var(--shadow-md); }
+  .menu-card .icon-wrap { width: 62px; height: 62px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.9rem; margin-bottom: 0.65rem; background: #fef8e7; }
+  .menu-card .menu-label { font-size: 0.88rem; font-weight: 800; color: var(--dark); line-height: 1.2; margin-bottom: 0.25rem; }
+  .menu-card .menu-desc { font-size: 0.68rem; font-weight: 500; color: var(--slate); line-height: 1.35; }
+
+  .tarif-info { background: var(--white); border: 1.5px solid var(--border); border-radius: 16px; padding: 1rem 1.1rem; margin-top: 0.75rem; box-shadow: var(--shadow-sm); }
+  .tarif-info-title { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; color: var(--hijau); margin-bottom: 0.65rem; }
+  .tarif-row { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid var(--hijau-light); font-size: 0.8rem; }
+  .tarif-row:last-child { border-bottom: none; }
+  .tarif-row .km { color: var(--slate); font-weight: 600; }
+  .tarif-row .harga { font-weight: 800; color: var(--hijau); }
+  .tarif-note { font-size: 0.68rem; color: var(--slate); margin-top: 0.55rem; line-height: 1.4; }
+
+  .jam-strip { display: flex; align-items: center; gap: 0.7rem; background: var(--white); border: 1.5px solid var(--border); border-radius: 14px; padding: 0.85rem 1rem; margin-top: 1.25rem; box-shadow: var(--shadow-sm); }
+  .jam-icon { font-size: 1.4rem; }
+  .jam-text .jam-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: var(--slate); letter-spacing: 0.4px; }
+  .jam-text .jam-value { font-size: 0.95rem; font-weight: 800; color: var(--hijau); }
+  .jam-text .jam-sub { font-size: 0.65rem; color: var(--slate); }
+  .dot-live { width: 8px; height: 8px; background: #25d366; border-radius: 50%; margin-left: auto; flex-shrink: 0; box-shadow: 0 0 0 3px rgba(37,211,102,0.25); animation: pulse 2s infinite; }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 3px rgba(37,211,102,0.25); }
+    50%  { box-shadow: 0 0 0 6px rgba(37,211,102,0.1); }
+    100% { box-shadow: 0 0 0 3px rgba(37,211,102,0.25); }
+  }
+
+  .panel { background: var(--white); border-radius: 22px; padding: 1.5rem; margin-top: 1.25rem; box-shadow: var(--shadow-md); border: 1.5px solid var(--border); display: none; }
+  .panel.active { display: block; animation: fadeInUp 0.3s ease-out; }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+  .panel-title { display: flex; align-items: center; gap: 0.55rem; font-size: 1rem; font-weight: 800; color: var(--hijau); margin-bottom: 1.25rem; border-bottom: 2px solid var(--hijau-light); padding-bottom: 0.75rem; }
+  .panel-title .p-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; background: #fef8e7; }
+
+  .f-group { margin-bottom: 1rem; }
+  .f-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--dark); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.3px; }
+  .f-group input, .f-group select, .f-group textarea { width: 100%; padding: 0.75rem 0.9rem; border: 1.5px solid var(--border); border-radius: 12px; font-family: inherit; font-size: 0.88rem; color: var(--dark); outline: none; background: var(--light-bg); transition: all 0.2s; appearance: none; -webkit-appearance: none; }
+  .f-group select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a6355' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; padding-right: 2.2rem; }
+  .f-group input:focus, .f-group select:focus, .f-group textarea:focus { border-color: var(--hijau-muda); background: var(--white); box-shadow: 0 0 0 3px rgba(77,175,112,0.12); }
+  .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .f-group input.error, .f-group select.error, .f-group textarea.error { border-color: #ef4444 !important; background: #fef2f2 !important; box-shadow: 0 0 0 3px rgba(239,68,68,0.12) !important; animation: shake 0.3s ease; }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+  /* JARAK BADGE */
+  .jarak-badge { display: flex; align-items: center; gap: 0.5rem; background: var(--hijau-light); border: 1.5px solid rgba(26,107,47,0.2); border-radius: 10px; padding: 0.6rem 0.9rem; font-size: 0.8rem; color: var(--hijau); font-weight: 700; margin-top: -0.3rem; margin-bottom: 1rem; transition: all 0.3s; min-height: 40px; }
+  .jarak-badge.hidden { display: none; }
+  .jarak-badge.loading { background: #fef9e7; border-color: rgba(245,200,66,0.4); color: #9a7a00; }
+  .jarak-badge.error  { background: #fef2f2; border-color: #fca5a5; color: #dc2626; }
+
+  .spinner { width: 14px; height: 14px; border: 2px solid rgba(26,107,47,0.2); border-top-color: var(--hijau); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .nota { background: var(--hijau-light); border: 1.5px dashed rgba(26,107,47,0.25); border-radius: 14px; padding: 1.1rem; margin-top: 1.1rem; }
+  .nota-head { font-size: 0.72rem; font-weight: 800; color: var(--hijau); text-transform: uppercase; margin-bottom: 0.6rem; letter-spacing: 0.5px; border-bottom: 1px solid rgba(26,107,47,0.15); padding-bottom: 0.4rem; }
+  .nota-line { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem; color: var(--slate); }
+  .nota-total { display: flex; justify-content: space-between; font-size: 1rem; font-weight: 800; color: var(--hijau); border-top: 1.5px solid rgba(26,107,47,0.15); padding-top: 0.6rem; margin-top: 0.6rem; }
+
+  .btn-submit { width: 100%; background: linear-gradient(135deg, var(--hijau) 0%, #2d8a47 100%); color: var(--white); font-family: inherit; font-size: 0.92rem; font-weight: 800; padding: 0.95rem; border: none; border-radius: 14px; cursor: pointer; margin-top: 1.25rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; box-shadow: 0 4px 16px rgba(26,107,47,0.3); }
+  .btn-submit:hover { filter: brightness(1.05); }
+  .btn-submit:active { transform: scale(0.98); }
+
+  /* OPSI KATEGORI CARD */
+  .opsi-card {
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    gap: 0.3rem; padding: 0.9rem 0.5rem; border: 2px solid var(--border);
+    border-radius: 14px; cursor: pointer; background: var(--light-bg);
+    transition: all 0.2s; user-select: none;
+  }
+  .opsi-card:active { transform: scale(0.97); }
+  .opsi-card.selected {
+    border-color: var(--hijau); background: var(--hijau-light);
+    box-shadow: 0 0 0 3px rgba(26,107,47,0.12);
+  }
+  .opsi-card.error-card { border-color: #ef4444 !important; background: #fef2f2 !important; animation: shake 0.3s ease; }
+  .opsi-icon { font-size: 1.8rem; }
+  .opsi-label { font-size: 0.8rem; font-weight: 800; color: var(--dark); line-height: 1.2; }
+  .opsi-sub { font-size: 0.65rem; color: var(--slate); font-weight: 500; }
+
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; padding: 1.25rem; backdrop-filter: blur(3px); }
+  .overlay.active { display: flex; }
+  .modal { background: var(--white); border-radius: 24px; padding: 1.75rem 1.5rem; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 24px 48px rgba(0,0,0,0.25); animation: fadeInUp 0.3s ease; }
+  .modal-icon { font-size: 2.8rem; margin-bottom: 0.5rem; }
+  .modal h3 { font-size: 1.15rem; font-weight: 800; margin-bottom: 0.3rem; color: var(--hijau); }
+  .modal p { font-size: 0.8rem; color: var(--slate); margin-bottom: 1rem; line-height: 1.5; }
+  .admin-card { background: var(--hijau-light); border: 1.5px solid rgba(26,107,47,0.18); border-radius: 14px; padding: 1rem; margin: 0.75rem 0 1rem; text-align: left; }
+  .admin-card .admin-label { font-size: 0.67rem; font-weight: 700; text-transform: uppercase; color: var(--slate); letter-spacing: 0.5px; margin-bottom: 0.35rem; }
+  .admin-card .admin-name { font-size: 1rem; font-weight: 800; color: var(--hijau); }
+  .admin-card .admin-zona { font-size: 0.75rem; color: var(--slate); margin-top: 0.15rem; }
+  .admin-card .admin-nomor { font-size: 0.78rem; font-weight: 600; color: var(--dark); margin-top: 0.2rem; }
+  .btn-wa-confirm { display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: #25d366; color: var(--white); font-weight: 800; padding: 0.9rem; border-radius: 14px; font-size: 0.9rem; box-shadow: 0 4px 14px rgba(37,211,102,0.35); cursor: pointer; border: none; width: 100%; font-family: inherit; transition: all 0.2s; }
+  .btn-wa-confirm:hover { background: #22c25e; }
+  .btn-close-modal { background: transparent; border: none; color: var(--slate); font-family: inherit; font-size: 0.82rem; font-weight: 600; margin-top: 0.85rem; cursor: pointer; width: 100%; }
+
+  /* API KEY BANNER */
+  .api-banner { background: #fffbeb; border: 1.5px solid #fcd34d; border-radius: 14px; padding: 0.9rem 1rem; margin-top: 1rem; font-size: 0.78rem; color: #92400e; line-height: 1.5; }
+  .api-banner strong { display: block; margin-bottom: 0.3rem; font-size: 0.8rem; }
+  .api-banner a { color: #1a6b2f; font-weight: 700; }
+
+  /* TOMBOL PILIH VIA PETA */
+  .btn-peta {
+    display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    width: 100%; padding: 0.55rem 0.75rem; margin-top: 0.4rem;
+    background: var(--white); border: 1.5px dashed var(--hijau-muda);
+    border-radius: 10px; color: var(--hijau); font-family: inherit;
+    font-size: 0.76rem; font-weight: 700; cursor: pointer;
+    transition: all 0.2s; letter-spacing: 0.1px;
+  }
+  .btn-peta:hover { background: var(--hijau-light); border-style: solid; }
+  .btn-peta:active { transform: scale(0.98); }
+  .btn-peta .dot-gps { width: 8px; height: 8px; background: var(--hijau-muda); border-radius: 50%; animation: pulse 2s infinite; flex-shrink: 0; }
+
+  /* BOTTOM SHEET PETA */
+  .map-sheet-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 3000;
+    backdrop-filter: blur(4px); align-items: flex-end; justify-content: center;
+  }
+  .map-sheet-overlay.active { display: flex; }
+
+  .map-sheet {
+    background: var(--white); border-radius: 28px 28px 0 0;
+    width: 100%; max-width: 520px; max-height: 92vh;
+    display: flex; flex-direction: column;
+    animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden; box-shadow: 0 -8px 40px rgba(0,0,0,0.25);
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .map-sheet-handle {
+    width: 40px; height: 4px; background: #d1d5db;
+    border-radius: 4px; margin: 10px auto 0; flex-shrink: 0;
+  }
+
+  .map-sheet-header {
+    padding: 0.9rem 1.25rem 0.75rem; display: flex;
+    align-items: center; justify-content: space-between;
+    border-bottom: 1.5px solid var(--border); flex-shrink: 0;
+  }
+  .map-sheet-header h4 { font-size: 0.95rem; font-weight: 800; color: var(--hijau); }
+  .map-sheet-header p  { font-size: 0.7rem; color: var(--slate); margin-top: 1px; }
+  .map-sheet-close {
+    width: 32px; height: 32px; border-radius: 50%; border: none;
+    background: var(--hijau-light); color: var(--hijau); font-size: 1rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-family: inherit; font-weight: 700; flex-shrink: 0;
+  }
+
+  .map-container { height: 320px; flex-shrink: 0; position: relative; }
+  #map-leaflet   { height: 100%; width: 100%; }
+
+  /* Crosshair center hint */
+  .map-crosshair {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%); pointer-events: none; z-index: 500;
+    font-size: 1.8rem; text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    display: none;
+  }
+
+  .map-sheet-footer {
+    padding: 0.85rem 1.25rem 1.1rem; flex-shrink: 0;
+    border-top: 1.5px solid var(--border); display: flex; flex-direction: column; gap: 0.65rem;
+  }
+
+  .map-detected-location {
+    display: flex; align-items: flex-start; gap: 0.6rem;
+    background: var(--hijau-light); border: 1.5px solid rgba(26,107,47,0.2);
+    border-radius: 12px; padding: 0.75rem 0.9rem; min-height: 52px;
+  }
+  .map-detected-location .loc-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+  .map-detected-location .loc-text { flex: 1; }
+  .map-detected-location .loc-label { font-size: 0.67rem; font-weight: 700; text-transform: uppercase; color: var(--slate); letter-spacing: 0.4px; }
+  .map-detected-location .loc-value { font-size: 0.84rem; font-weight: 700; color: var(--dark); margin-top: 1px; line-height: 1.3; }
+  .map-detected-location .loc-value.loading { color: var(--slate); font-weight: 500; font-style: italic; }
+
+  .map-sheet-actions { display: flex; gap: 0.6rem; }
+  .btn-map-gps {
+    display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+    padding: 0.7rem 0.85rem; background: var(--hijau-light); border: 1.5px solid rgba(26,107,47,0.2);
+    border-radius: 12px; color: var(--hijau); font-family: inherit;
+    font-size: 0.78rem; font-weight: 700; cursor: pointer; flex-shrink: 0; transition: all 0.2s;
+  }
+  .btn-map-gps:active { transform: scale(0.97); }
+  .btn-map-confirm {
+    flex: 1; padding: 0.75rem; background: linear-gradient(135deg, var(--hijau) 0%, #2d8a47 100%);
+    color: var(--white); border: none; border-radius: 12px; font-family: inherit;
+    font-size: 0.88rem; font-weight: 800; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(26,107,47,0.3); display: flex; align-items: center;
+    justify-content: center; gap: 0.4rem;
+  }
+  .btn-map-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-map-confirm:not(:disabled):active { transform: scale(0.98); }
+
+  /* Leaflet custom marker */
+  .leaflet-marker-icon.custom-pin { filter: hue-rotate(100deg) saturate(1.5); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand-logo">
+    <svg class="logo-svg" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="8" y="26" width="52" height="44" rx="8" fill="#1a6b2f"/>
+      <rect x="8" y="26" width="52" height="44" rx="8" fill="url(#bagGrad)" opacity="0.15"/>
+      <path d="M20 26 C20 14 34 10 34 10" stroke="#1a6b2f" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <path d="M48 26 C48 14 34 10 34 10" stroke="#1a6b2f" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <circle cx="24" cy="48" r="3.5" fill="rgba(255,255,255,0.7)"/>
+      <circle cx="44" cy="48" r="3.5" fill="rgba(255,255,255,0.7)"/>
+      <path d="M22 57 Q34 64 46 57" stroke="rgba(255,255,255,0.85)" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <path d="M12 38 L12 44" stroke="rgba(255,255,255,0.35)" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M12 48 L12 52" stroke="rgba(255,255,255,0.35)" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="60" cy="22" r="14" fill="#f5c842"/>
+      <circle cx="60" cy="18" r="5.5" fill="white"/>
+      <path d="M60 24 L55 32 L65 32 Z" fill="#f5c842"/>
+      <circle cx="60" cy="18" r="2.5" fill="#f5c842"/>
+      <defs>
+        <linearGradient id="bagGrad" x1="8" y1="26" x2="60" y2="70">
+          <stop offset="0%" stop-color="white"/><stop offset="100%" stop-color="black"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div class="brand-text">
+      <div class="brand-name">Titip<span>.id</span></div>
+      <div class="brand-tagline">Jasa Titip Lokal</div>
+    </div>
+  </div>
+  <div class="area-badge">Bojong • Darangdan<br>Wanayasa • Kiarapedes</div>
+</nav>
+
+<div class="container">
+
+  <div class="hero-banner">
+    <div class="hero-badge">✦ Lokal Dekat Amanah</div>
+    <h2>Titip Apa Aja,<br>Kami Antar ke Anda.</h2>
+    <p>Layanan jastip cepat untuk 4 kecamatan — harga otomatis sesuai jarak nyata via peta.</p>
+    <div class="hero-icon">🛒</div>
+  </div>
+
+  <div class="features-strip">
+    <div class="feat-chip"><span class="dot"></span> Respon Cepat</div>
+    <div class="feat-chip"><span class="dot"></span> Harga Transparan</div>
+    <div class="feat-chip"><span class="dot"></span> Amanah & Terpercaya</div>
+    <div class="feat-chip"><span class="dot"></span> Tarif Real Jarak</div>
+    <div class="feat-chip"><span class="dot"></span> Lokal & Dekat</div>
+  </div>
+
+  <div class="section-title">Form Pemesanan Jastip</div>
+
+  <div class="tarif-info">
+    <div class="tarif-info-title">📍 Tarif Ongkir Berdasarkan Jarak</div>
+    <div class="tarif-row"><span class="km">0 – 3 km</span><span class="harga">Rp 3.000</span></div>
+    <div class="tarif-row"><span class="km">3 – 6 km</span><span class="harga">Rp 6.000</span></div>
+    <div class="tarif-row"><span class="km">6 – 10 km</span><span class="harga">Rp 10.000</span></div>
+    <div class="tarif-row"><span class="km">10 – 15 km</span><span class="harga">Rp 15.000</span></div>
+    <div class="tarif-row"><span class="km">&gt; 15 km</span><span class="harga">Rp 20.000</span></div>
+    <div class="tarif-note">* Jarak dihitung dari titik kurir ke lokasi Anda via OpenStreetMap.</div>
+  </div>
+
+  <div class="jam-strip">
+    <div class="jam-icon">🕗</div>
+    <div class="jam-text">
+      <div class="jam-label">Jam Operasional</div>
+      <div class="jam-value">08.00 – 22.00</div>
+      <div class="jam-sub">Setiap hari, termasuk hari libur</div>
+    </div>
+    <div class="dot-live"></div>
+  </div>
+
+  <!-- FORM LANGSUNG TAMPIL -->
+  <div class="panel active" id="panel-jastip">
+    <div class="panel-title">
+      <div class="p-icon">🛒</div>
+      Layanan Jasa Titip Belanja
+    </div>
+
+    <div class="f-group">
+      <label>Nama Lengkap Pemesan *</label>
+      <input type="text" id="jas-nama" placeholder="Tulis nama Anda">
+    </div>
+    <div class="f-group">
+      <label>Nomor WhatsApp Aktif *</label>
+      <input type="tel" id="jas-wa" placeholder="Contoh: 081234567xxx">
+    </div>
+
+    <!-- ASAL -->
+    <div class="f-row">
+      <div class="f-group">
+        <label>Kecamatan Asal *</label>
+        <select id="jas-kec-asal" onchange="sinkronDesa('jas-kec-asal','jas-desa-asal'); jadwalkanHitung();">
+          <option value="Bojong">Bojong</option>
+          <option value="Darangdan">Darangdan</option>
+          <option value="Wanayasa">Wanayasa</option>
+          <option value="Kiarapedes">Kiarapedes</option>
+          <option value="Luar">— Luar Area —</option>
+        </select>
+      </div>
+      <div class="f-group">
+        <label>Desa Asal *</label>
+        <select id="jas-desa-asal" onchange="jadwalkanHitung()"></select>
+      </div>
+    </div>
+    <button type="button" class="btn-peta" onclick="bukaPeta('asal')">
+      <span class="dot-gps"></span> 📍 Pilih Titik Jemput via Peta (lebih akurat)
+    </button>
+
+    <!-- TUJUAN -->
+    <div class="f-row">
+      <div class="f-group">
+        <label>Kecamatan Tujuan *</label>
+        <select id="jas-kec-tujuan" onchange="sinkronDesa('jas-kec-tujuan','jas-desa-tujuan'); jadwalkanHitung();">
+          <option value="Bojong">Bojong</option>
+          <option value="Darangdan">Darangdan</option>
+          <option value="Wanayasa">Wanayasa</option>
+          <option value="Kiarapedes">Kiarapedes</option>
+          <option value="Luar">— Luar Area —</option>
+        </select>
+      </div>
+      <div class="f-group">
+        <label>Desa Tujuan *</label>
+        <select id="jas-desa-tujuan" onchange="jadwalkanHitung()"></select>
+      </div>
+    </div>
+    <button type="button" class="btn-peta" onclick="bukaPeta('tujuan')">
+      <span class="dot-gps"></span> 📍 Pilih Titik Antar via Peta (lebih akurat)
+    </button>
+
+    <!-- STATUS JARAK -->
+    <div class="jarak-badge hidden" id="jarak-badge">
+      <span id="jarak-icon">📏</span>
+      <span id="jarak-teks">–</span>
+    </div>
+
+    <div class="f-group">
+      <label>Nama Kampung / RT / RW *</label>
+      <input type="text" id="jas-kampung" placeholder="Contoh: Kp. Babakan RT 04/02">
+    </div>
+
+    <div class="f-group">
+      <label>Kategori Titipan *</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-top:0.1rem;">
+        <div class="opsi-card" id="opsi-makanan" onclick="pilihKategori('makanan')">
+          <span class="opsi-icon">🍱</span>
+          <span class="opsi-label">Jastip Makanan</span>
+          <span class="opsi-sub">Makanan, minuman, warung</span>
+        </div>
+        <div class="opsi-card" id="opsi-barang" onclick="pilihKategori('barang')">
+          <span class="opsi-icon">📦</span>
+          <span class="opsi-label">Jastip Barang</span>
+          <span class="opsi-sub">Belanja, paket, dokumen</span>
+        </div>
+      </div>
+      <input type="hidden" id="jas-opsi" value="">
+    </div>
+
+    <div class="f-group">
+      <label>Detail Titipan / Catatan Kurir *</label>
+      <textarea id="jas-detail" rows="3" placeholder="Tuliskan detail titipan, nama toko/warung, atau keterangan lainnya..."></textarea>
+    </div>
+
+    <div class="nota">
+      <div class="nota-head">Estimasi Ongkos Titip.id</div>
+      <div class="nota-line"><span>Tarif Jasa</span><span id="lbl-jasa">–</span></div>
+      <div class="nota-line"><span>Ongkir Jarak (<span id="lbl-km">menghitung...</span>)</span><span id="lbl-ongkir">–</span></div>
+      <div class="nota-line"><span>Biaya Layanan</span><span>Rp 2.000</span></div>
+      <div class="nota-total"><span>Total Estimasi</span><span id="lbl-total">–</span></div>
+      <div style="margin-top:0.65rem;background:rgba(245,200,66,0.15);border:1px dashed #f5c842;border-radius:8px;padding:0.55rem 0.7rem;font-size:0.72rem;color:#7a5a00;line-height:1.45;">
+        ⚠️ <strong>Harga estimasi saja.</strong> Harga final bisa berbeda tergantung harga belanja, jenis titipan, dan kondisi lapangan. Admin akan konfirmasi sebelum belanja.
+      </div>
+    </div>
+
+    <button class="btn-submit" onclick="kirimForm()">Kirim Pesanan ke Kurir 🚀</button>
+
+    <!-- PANDUAN API KEY -->
+    <div class="api-banner" id="api-banner" style="display:none;">
+      ⚠️ <strong>API Key ORS belum diset</strong>
+      Daftar gratis (email saja, tanpa kartu bank) di <a href="https://openrouteservice.org/dev/#/signup" target="_blank">openrouteservice.org</a>, lalu ganti <code>ORS_API_KEY</code> di script.
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM SHEET PETA -->
+<div class="map-sheet-overlay" id="map-sheet-overlay" onclick="tutupPeta(event)">
+  <div class="map-sheet" id="map-sheet">
+    <div class="map-sheet-handle"></div>
+    <div class="map-sheet-header">
+      <div>
+        <h4 id="map-sheet-title">📍 Pilih Titik Lokasi</h4>
+        <p>Geser peta atau seret pin — lalu tekan Konfirmasi</p>
+      </div>
+      <button class="map-sheet-close" onclick="tutupPeta()">✕</button>
+    </div>
+
+    <div class="map-container">
+      <div id="map-leaflet"></div>
+    </div>
+
+    <div class="map-sheet-footer">
+      <div class="map-detected-location" id="map-detected-box">
+        <span class="loc-icon">📍</span>
+        <div class="loc-text">
+          <div class="loc-label">Lokasi Terdeteksi</div>
+          <div class="loc-value loading" id="map-loc-value">Seret pin untuk memilih lokasi...</div>
+        </div>
+      </div>
+      <div class="map-sheet-actions">
+        <button class="btn-map-gps" onclick="pakaiGPS()" title="Gunakan lokasi GPS saya">
+          🎯 GPS Saya
+        </button>
+        <button class="btn-map-confirm" id="btn-konfirmasi-peta" onclick="konfirmasiPeta()" disabled>
+          ✓ Konfirmasi Lokasi
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="modal-gateway">
+  <div class="modal">
+    <div class="modal-icon">📋</div>
+    <h3>Konfirmasi Pesanan</h3>
+    <p>Pesanan Anda akan diteruskan ke admin berikut:</p>
+    <div class="admin-card">
+      <div class="admin-label">👤 Admin yang Bertugas</div>
+      <div class="admin-name" id="modal-nama-admin">-</div>
+      <div class="admin-zona" id="modal-zona-admin">-</div>
+      <div class="admin-nomor" id="modal-nomor-admin">-</div>
+    </div>
+    <button class="btn-wa-confirm" onclick="lanjutKeWA()">💬 Ya, Kirim ke WhatsApp</button>
+    <button class="btn-close-modal" onclick="tutupModal()">✕ Batal</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// ============================================================
+// ⚙️  KONFIGURASI — Ganti dengan API key ORS Anda
+// Daftar GRATIS (email saja, tanpa kartu bank):
+// https://openrouteservice.org/dev/#/signup
+// ============================================================
+const ORS_API_KEY = 'MASUKKAN_API_KEY_ORS_ANDA_DI_SINI';
+
+// ============================================================
+// DATABASE WILAYAH
+// ============================================================
+const DB = {
+  "Bojong":     ["Bojong Barat","Bojong Timur","Cibingbin","Cihanjawar","Cikeris","Cileunca","Cipeundeuy","Kertasari","Pangkalan","Pasanggrahan","Pawenang","Sindangpanon","Sindangsari","Sukamanah"],
+  "Darangdan":  ["Cilingga","Darangdan","Depok","Gununghejo","Legoksari","Linggamukti","Linggasari","Mekarsari","Nagrak","Nangewer","Neglasari","Pasirangin","Sadarkarya","Sawit","Sirnamanah"],
+  "Wanayasa":   ["Babakan","Ciawi","Cibuntu","Legokhuni","Nagrog","Nangerang","Raharja","Sakambang","Simpang","Sukadami","Sumurugul","Taringgul Tengah","Taringgul Tonggoh","Wanasari","Wanayasa"],
+  "Kiarapedes": ["Cibeber","Ciracas","Gardu","Kiarapedes","Margaluyu","Mekarjaya","Parakan Garokgek","Pusakamulya","Sumbersari","Taringgul Landeuh"]
+};
+
+// ============================================================
+// KOORDINAT TIAP DESA (lat, lng)
+// ============================================================
+const KOORDINAT = {
+  "Bojong Barat":   [-6.7012, 107.5021], "Bojong Timur":   [-6.6985, 107.5102],
+  "Cibingbin":      [-6.7145, 107.5210], "Cihanjawar":     [-6.7230, 107.5320],
+  "Cikeris":        [-6.7310, 107.5410], "Cileunca":       [-6.7180, 107.5150],
+  "Cipeundeuy":     [-6.7050, 107.5080], "Kertasari":      [-6.7260, 107.5380],
+  "Pangkalan":      [-6.6940, 107.4950], "Pasanggrahan":   [-6.7090, 107.5130],
+  "Pawenang":       [-6.7120, 107.5200], "Sindangpanon":   [-6.6970, 107.5060],
+  "Sindangsari":    [-6.7030, 107.5090], "Sukamanah":      [-6.6960, 107.5010],
+  "Cilingga":       [-6.6720, 107.5580], "Darangdan":      [-6.6650, 107.5500],
+  "Depok":          [-6.6700, 107.5540], "Gununghejo":     [-6.6580, 107.5630],
+  "Legoksari":      [-6.6790, 107.5470], "Linggamukti":    [-6.6640, 107.5510],
+  "Linggasari":     [-6.6610, 107.5560], "Mekarsari":      [-6.6730, 107.5490],
+  "Nagrak":         [-6.6560, 107.5620], "Nangewer":       [-6.6530, 107.5650],
+  "Neglasari":      [-6.6760, 107.5460], "Pasirangin":     [-6.6680, 107.5590],
+  "Sadarkarya":     [-6.6710, 107.5520], "Sawit":          [-6.6820, 107.5440],
+  "Sirnamanah":     [-6.6600, 107.5570],
+  "Babakan":        [-6.6420, 107.6010], "Ciawi":          [-6.6480, 107.6080],
+  "Cibuntu":        [-6.6350, 107.6150], "Legokhuni":      [-6.6500, 107.6050],
+  "Nagrog":         [-6.6460, 107.6020], "Nangerang":      [-6.6310, 107.6200],
+  "Raharja":        [-6.6550, 107.5980], "Sakambang":      [-6.6390, 107.6130],
+  "Simpang":        [-6.6440, 107.6070], "Sukadami":       [-6.6370, 107.6170],
+  "Sumurugul":      [-6.6520, 107.6000], "Taringgul Tengah":[-6.6610, 107.5940],
+  "Taringgul Tonggoh":[-6.6580, 107.5960], "Wanasari":     [-6.6410, 107.6110],
+  "Wanayasa":       [-6.6450, 107.6040],
+  "Cibeber":        [-6.6820, 107.5870], "Ciracas":        [-6.6780, 107.5840],
+  "Gardu":          [-6.6730, 107.5910], "Kiarapedes":     [-6.6800, 107.5860],
+  "Margaluyu":      [-6.6750, 107.5890], "Mekarjaya":      [-6.6760, 107.5850],
+  "Parakan Garokgek":[-6.6690, 107.5930], "Pusakamulya":   [-6.6840, 107.5820],
+  "Sumbersari":     [-6.6810, 107.5830], "Taringgul Landeuh":[-6.6870, 107.5800]
+};
+
+const PUSAT_KEC = {
+  "Bojong":     [-6.7012, 107.5021], "Darangdan":  [-6.6650, 107.5500],
+  "Wanayasa":   [-6.6450, 107.6040], "Kiarapedes": [-6.6800, 107.5860],
+  "Luar":       [-6.720,  107.530 ]
+};
+
+// Titik base kurir (dari sini jarak dihitung ke lokasi pelanggan)
+// Aep Mulyana  → Pondok Pesantren Misbahul Khoer, Desa Pangkalan, Kec. Bojong
+// Aldi Rizaldi → Desa Gardu, Kec. Kiarapedes
+const KURIR_BASE = {
+  "aep":  { lat: -6.6940, lng: 107.4950 }, // Pangkalan, Bojong
+  "aldi": { lat: -6.6730, lng: 107.5910 }  // Gardu, Kiarapedes
+};
+
+function getKurirBase(kecTujuan) {
+  // Aldi handle Wanayasa & Kiarapedes, Aep handle sisanya
+  return ['Wanayasa','Kiarapedes'].includes(kecTujuan)
+    ? KURIR_BASE.aldi
+    : KURIR_BASE.aep;
+}
+
+// ============================================================
+// STATE
+// ============================================================
+let jarakKmReal  = null;
+let hitungTimer  = null;
+let kategoriDipilih = null; // 'makanan' | 'barang'
+
+// ============================================================
+// PILIH KATEGORI
+// ============================================================
+function pilihKategori(tipe) {
+  kategoriDipilih = tipe;
+  document.getElementById('jas-opsi').value = tipe;
+  document.getElementById('opsi-makanan').classList.toggle('selected', tipe === 'makanan');
+  document.getElementById('opsi-barang').classList.toggle('selected',  tipe === 'barang');
+  document.getElementById('opsi-makanan').classList.remove('error-card');
+  document.getElementById('opsi-barang').classList.remove('error-card');
+  const catatan = document.getElementById('nota-catatan-barang');
+  if (catatan) catatan.style.display = tipe === 'barang' ? 'block' : 'none';
+  updateNota();
+}
+
+// ============================================================
+// SINKRONISASI DESA
+// ============================================================
+function sinkronDesa(idKec, idDesa) {
+  const kec = document.getElementById(idKec).value;
+  const sel = document.getElementById(idDesa);
+  sel.innerHTML = '';
+  if (kec === 'Luar') {
+    const opt = document.createElement('option');
+    opt.value = 'Luar Area'; opt.textContent = '— Sebutkan di catatan —';
+    sel.appendChild(opt); return;
+  }
+  (DB[kec] || []).forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d; opt.textContent = d;
+    sel.appendChild(opt);
+  });
+}
+
+// ============================================================
+// DEBOUNCE HITUNG JARAK
+// ============================================================
+function jadwalkanHitung() {
+  clearTimeout(hitungTimer);
+  tampilJarak('loading', '<div class="spinner"></div> Menghitung jarak via peta...');
+  hitungTimer = setTimeout(hitungJarakMapbox, 600);
+}
+
+// ============================================================
+// HITUNG JARAK — fungsi asli (dioverride oleh versi peta di bawah)
+// ============================================================
+async function hitungJarakMapbox_LAMA() {
+  const kecAsal    = document.getElementById('jas-kec-asal').value;
+  const desaAsal   = document.getElementById('jas-desa-asal').value;
+  const kecTujuan  = document.getElementById('jas-kec-tujuan').value;
+  const desaTujuan = document.getElementById('jas-desa-tujuan').value;
+
+  const koordAsal   = KOORDINAT[desaAsal]   || PUSAT_KEC[kecAsal];
+  const koordTujuan = KOORDINAT[desaTujuan] || PUSAT_KEC[kecTujuan];
+
+  if (ORS_API_KEY === 'MASUKKAN_API_KEY_ORS_ANDA_DI_SINI') {
+    document.getElementById('api-banner').style.display = 'block';
+    const km = haversine(koordAsal, koordTujuan) * 1.35;
+    jarakKmReal = Math.round(km * 10) / 10;
+    tampilJarak('ok', `📏 ±${jarakKmReal} km (estimasi — belum ada API key ORS)`);
+    updateNota();
+    return;
+  }
+
+  document.getElementById('api-banner').style.display = 'none';
+
+  try {
+    const body = {
+      coordinates: [
+        [koordAsal[1],   koordAsal[0]],
+        [koordTujuan[1], koordTujuan[0]]
+      ]
+    };
+
+    const res = await fetch('https://api.openrouteservice.org/v2/directions/driving-car', {
+      method: 'POST',
+      headers: {
+        'Authorization': ORS_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) throw new Error('ORS error ' + res.status);
+    const data = await res.json();
+
+    const meter = data.routes[0].summary.distance;
+    const detik = data.routes[0].summary.duration;
+    jarakKmReal = Math.round((meter / 1000) * 10) / 10;
+    const menit = Math.round(detik / 60);
+
+    tampilJarak('ok', `📍 ${jarakKmReal} km · ±${menit} menit berkendara`);
+    updateNota();
+
+  } catch(e) {
+    const km = haversine(koordAsal, koordTujuan) * 1.35;
+    jarakKmReal = Math.round(km * 10) / 10;
+    tampilJarak('ok', `📏 ±${jarakKmReal} km (estimasi — cek koneksi)`);
+    updateNota();
+  }
+}
+
+// ============================================================
+// HAVERSINE — fallback jarak garis lurus
+// ============================================================
+function haversine([lat1,lng1], [lat2,lng2]) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// ============================================================
+// TAMPIL BADGE JARAK
+// ============================================================
+function tampilJarak(status, html) {
+  const badge = document.getElementById('jarak-badge');
+  badge.classList.remove('hidden','loading','error');
+  if (status === 'loading') badge.classList.add('loading');
+  if (status === 'error')   badge.classList.add('error');
+  badge.innerHTML = html;
+}
+
+// ============================================================
+// UPDATE NOTA
+// ============================================================
+function ongkirDariKm(km) {
+  if (km === null) return null;
+  if (km <= 3)  return 3000;
+  if (km <= 6)  return 6000;
+  if (km <= 10) return 10000;
+  if (km <= 15) return 15000;
+  return 20000;
+}
+
+function updateNota() {
+  const tarifJasa = kategoriDipilih === 'makanan' ? 7000 : kategoriDipilih === 'barang' ? 8000 : null;
+  const ongkir    = ongkirDariKm(jarakKmReal);
+
+  document.getElementById('lbl-jasa').textContent = tarifJasa
+    ? `Rp ${tarifJasa.toLocaleString('id-ID')}`
+    : '–';
+
+  if (ongkir === null || tarifJasa === null) {
+    document.getElementById('lbl-km').textContent     = 'menghitung...';
+    document.getElementById('lbl-ongkir').textContent = '–';
+    document.getElementById('lbl-total').textContent  = '–';
+    return;
+  }
+
+  const total = tarifJasa + ongkir + 2000;
+  document.getElementById('lbl-km').textContent     = `${jarakKmReal} km`;
+  document.getElementById('lbl-ongkir').textContent = `Rp ${ongkir.toLocaleString('id-ID')}`;
+  document.getElementById('lbl-total').textContent  = `Rp ${total.toLocaleString('id-ID')}`;
+}
+
+// ============================================================
+// 🗺️  LEAFLET MAP — PILIH LOKASI
+// ============================================================
+let mapInstance    = null;
+let mapMarker      = null;
+let mapMode        = null;  // 'asal' | 'tujuan'
+let mapKoordPilih  = null;  // { lat, lng } final
+let geocodeTimer   = null;
+
+// Simpan koordinat presisi dari peta (override koordinat desa)
+let koordAsalPresisi   = null;
+let koordTujuanPresisi = null;
+
+// Custom icon hijau
+function buatIcon() {
+  return L.divIcon({
+    html: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="44" viewBox="0 0 32 44">
+      <path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 28 16 28s16-16 16-28C32 7.2 24.8 0 16 0z" fill="#1a6b2f"/>
+      <circle cx="16" cy="16" r="7" fill="white"/>
+      <circle cx="16" cy="16" r="4" fill="#1a6b2f"/>
+    </svg>`,
+    iconSize: [32, 44],
+    iconAnchor: [16, 44],
+    popupAnchor: [0, -44],
+    className: ''
+  });
+}
+
+function initPeta() {
+  if (mapInstance) return;
+
+  // Pusat: sekitar Purwakarta
+  mapInstance = L.map('map-leaflet', {
+    center: [-6.680, 107.540],
+    zoom: 13,
+    zoomControl: true,
+    attributionControl: false
+  });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+  }).addTo(mapInstance);
+
+  // Tap/klik → pindah pin
+  mapInstance.on('click', function(e) {
+    pindahPin(e.latlng.lat, e.latlng.lng);
+  });
+
+  // Marker bisa di-drag
+  mapMarker = L.marker([-6.680, 107.540], {
+    icon: buatIcon(),
+    draggable: true
+  }).addTo(mapInstance);
+
+  mapMarker.on('dragstart', () => {
+    document.getElementById('map-loc-value').textContent = 'Sedang memilih...';
+    document.getElementById('map-loc-value').className = 'loc-value loading';
+    document.getElementById('btn-konfirmasi-peta').disabled = true;
+    mapKoordPilih = null;
+  });
+
+  mapMarker.on('dragend', function(e) {
+    const pos = e.target.getLatLng();
+    pindahPin(pos.lat, pos.lng);
+  });
+}
+
+function pindahPin(lat, lng) {
+  if (!mapMarker) return;
+  mapMarker.setLatLng([lat, lng]);
+  mapInstance.panTo([lat, lng]);
+  mapKoordPilih = { lat, lng };
+
+  // Geocode balik via Nominatim
+  clearTimeout(geocodeTimer);
+  document.getElementById('map-loc-value').textContent = 'Mengidentifikasi lokasi...';
+  document.getElementById('map-loc-value').className = 'loc-value loading';
+  document.getElementById('btn-konfirmasi-peta').disabled = true;
+
+  geocodeTimer = setTimeout(() => reverseGeocode(lat, lng), 600);
+}
+
+async function reverseGeocode(lat, lng) {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&accept-language=id`;
+    const res = await fetch(url, { headers: { 'Accept-Language': 'id' } });
+    if (!res.ok) throw new Error('Nominatim error');
+    const data = await res.json();
+
+    const addr = data.address || {};
+    // Ambil nama lokasi terdalam yang tersedia
+    const nama = addr.village || addr.suburb || addr.town || addr.city_district || addr.county || 'Lokasi dipilih';
+    const kec  = addr.subdistrict || addr.city_district || '';
+    const kab  = addr.city || addr.county || '';
+
+    const tampil = [nama, kec, kab].filter(Boolean).join(', ');
+    document.getElementById('map-loc-value').textContent = tampil || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    document.getElementById('map-loc-value').className = 'loc-value';
+    document.getElementById('btn-konfirmasi-peta').disabled = false;
+
+    // Simpan nama desa dari geocode untuk sinkron ke dropdown
+    mapMarker._geocodeResult = { nama, kec, addr, lat, lng };
+
+  } catch (e) {
+    document.getElementById('map-loc-value').textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)} — tap Konfirmasi`;
+    document.getElementById('map-loc-value').className = 'loc-value';
+    document.getElementById('btn-konfirmasi-peta').disabled = false;
+    mapMarker._geocodeResult = { nama: null, kec: null, addr: {}, lat, lng };
+  }
+}
+
+// Buka bottom sheet peta
+function bukaPeta(mode) {
+  mapMode = mode;
+  const overlay = document.getElementById('map-sheet-overlay');
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  // Judul sesuai mode
+  document.getElementById('map-sheet-title').textContent =
+    mode === 'asal' ? '📍 Pilih Titik Penjemputan' : '📍 Pilih Titik Pengantaran';
+
+  // Reset status
+  document.getElementById('map-loc-value').textContent = 'Seret pin atau ketuk peta...';
+  document.getElementById('map-loc-value').className = 'loc-value loading';
+  document.getElementById('btn-konfirmasi-peta').disabled = true;
+  mapKoordPilih = null;
+
+  // Init peta (hanya sekali)
+  setTimeout(() => {
+    initPeta();
+    mapInstance.invalidateSize();
+
+    // Posisi awal: dari koordinat desa yang sudah dipilih
+    const refKoord = mode === 'asal' ? koordAsalPresisi : koordTujuanPresisi;
+    if (refKoord) {
+      mapInstance.setView([refKoord.lat, refKoord.lng], 15);
+      mapMarker.setLatLng([refKoord.lat, refKoord.lng]);
+    } else {
+      const kecEl  = document.getElementById(mode === 'asal' ? 'jas-kec-asal' : 'jas-kec-tujuan');
+      const desaEl = document.getElementById(mode === 'asal' ? 'jas-desa-asal' : 'jas-desa-tujuan');
+      const koord  = KOORDINAT[desaEl.value] || PUSAT_KEC[kecEl.value] || [-6.680, 107.540];
+      mapInstance.setView(koord, 15);
+      mapMarker.setLatLng(koord);
+    }
+  }, 200);
+}
+
+// Tutup bottom sheet
+function tutupPeta(evt) {
+  if (evt && evt.target !== document.getElementById('map-sheet-overlay')) return;
+  document.getElementById('map-sheet-overlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// Gunakan GPS perangkat
+function pakaiGPS() {
+  if (!navigator.geolocation) {
+    alert('Browser ini tidak mendukung GPS.');
+    return;
+  }
+  document.getElementById('map-loc-value').textContent = 'Mengambil posisi GPS...';
+  document.getElementById('map-loc-value').className = 'loc-value loading';
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      mapInstance.setView([lat, lng], 16);
+      pindahPin(lat, lng);
+    },
+    () => {
+      alert('Tidak bisa mengambil lokasi GPS. Pastikan izin lokasi diaktifkan.');
+    },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+}
+
+// Konfirmasi & sinkron ke form
+function konfirmasiPeta() {
+  if (!mapKoordPilih) return;
+
+  const { lat, lng } = mapKoordPilih;
+  const result = mapMarker._geocodeResult || {};
+
+  // Simpan koordinat presisi
+  if (mapMode === 'asal')   koordAsalPresisi   = { lat, lng };
+  if (mapMode === 'tujuan') koordTujuanPresisi = { lat, lng };
+
+  // Coba cocokkan ke desa terdekat dalam DB
+  const desaTerdekat = cariDesaTerdekat(lat, lng);
+
+  if (desaTerdekat) {
+    const kecId  = mapMode === 'asal' ? 'jas-kec-asal'   : 'jas-kec-tujuan';
+    const desaId = mapMode === 'asal' ? 'jas-desa-asal'  : 'jas-desa-tujuan';
+
+    // Set kecamatan
+    const kecSel = document.getElementById(kecId);
+    kecSel.value = desaTerdekat.kec;
+    kecSel.classList.remove('error');
+
+    // Sinkron desa lalu set nilai
+    sinkronDesa(kecId, desaId);
+    const desaSel = document.getElementById(desaId);
+    desaSel.value = desaTerdekat.desa;
+    desaSel.classList.remove('error');
+  }
+
+  // Trigger hitung jarak ulang (pakai koordinat presisi)
+  jadwalkanHitung();
+  tutupPeta();
+
+  // Feedback visual pada tombol peta
+  const btnId = mapMode === 'asal' ? 0 : 1;
+  const btns = document.querySelectorAll('.btn-peta');
+  if (btns[btnId]) {
+    btns[btnId].innerHTML = `<span class="dot-gps"></span> ✅ Lokasi dipilih via peta`;
+    btns[btnId].style.background = 'var(--hijau-light)';
+    btns[btnId].style.borderColor = 'var(--hijau)';
+  }
+}
+
+// Cari desa paling dekat dengan koordinat yang dipilih
+function cariDesaTerdekat(lat, lng) {
+  let minDist = Infinity;
+  let hasil = null;
+
+  for (const [kec, desas] of Object.entries(DB)) {
+    for (const desa of desas) {
+      const koord = KOORDINAT[desa];
+      if (!koord) continue;
+      const dist = Math.sqrt(
+        Math.pow(koord[0] - lat, 2) + Math.pow(koord[1] - lng, 2)
+      );
+      if (dist < minDist) {
+        minDist = dist;
+        hasil = { kec, desa };
+      }
+    }
+  }
+  return hasil;
+}
+
+// ============================================================
+// OVERRIDE hitungJarakMapbox — hitung dari titik kurir ke tujuan pelanggan
+// ============================================================
+async function hitungJarakMapbox() {
+  const kecTujuan  = document.getElementById('jas-kec-tujuan').value;
+  const desaTujuan = document.getElementById('jas-desa-tujuan').value;
+
+  // Titik asal = base kurir yang bertugas (bukan lokasi pelanggan)
+  const kurirBase  = getKurirBase(kecTujuan);
+  const koordAsal  = [kurirBase.lat, kurirBase.lng];
+
+  // Titik tujuan = lokasi pelanggan (presisi peta atau koordinat desa)
+  const koordTujuan = koordTujuanPresisi
+    ? [koordTujuanPresisi.lat, koordTujuanPresisi.lng]
+    : (KOORDINAT[desaTujuan] || PUSAT_KEC[kecTujuan]);
+
+  const pakaipeta = !!koordTujuanPresisi;
+
+  if (ORS_API_KEY === 'MASUKKAN_API_KEY_ORS_ANDA_DI_SINI') {
+    document.getElementById('api-banner').style.display = 'block';
+    const km = haversine(koordAsal, koordTujuan) * 1.35;
+    jarakKmReal = Math.round(km * 10) / 10;
+    tampilJarak('ok', `📏 ±${jarakKmReal} km dari kurir${pakaipeta ? ' · 🗺️ peta' : ''}`);
+    updateNota();
+    return;
+  }
+
+  document.getElementById('api-banner').style.display = 'none';
+
+  try {
+    const body = {
+      coordinates: [
+        [koordAsal[1],    koordAsal[0]],
+        [koordTujuan[1],  koordTujuan[0]]
+      ]
+    };
+
+    const res = await fetch('https://api.openrouteservice.org/v2/directions/driving-car', {
+      method: 'POST',
+      headers: { 'Authorization': ORS_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) throw new Error('ORS error ' + res.status);
+    const data = await res.json();
+
+    const meter = data.routes[0].summary.distance;
+    const detik = data.routes[0].summary.duration;
+    jarakKmReal = Math.round((meter / 1000) * 10) / 10;
+    const menit = Math.round(detik / 60);
+
+    tampilJarak('ok', `📍 ${jarakKmReal} km dari kurir · ±${menit} menit${pakaipeta ? ' · 🗺️ peta' : ''}`);
+    updateNota();
+
+  } catch(e) {
+    const km = haversine(koordAsal, koordTujuan) * 1.35;
+    jarakKmReal = Math.round(km * 10) / 10;
+    tampilJarak('ok', `📏 ±${jarakKmReal} km dari kurir${pakaipeta ? ' · 🗺️ peta' : ''}`);
+    updateNota();
+  }
+}
+
+window.onload = function() {
+  sinkronDesa('jas-kec-asal',   'jas-desa-asal');
+  sinkronDesa('jas-kec-tujuan', 'jas-desa-tujuan');
+  jadwalkanHitung();
+};
+
+// ============================================================
+// PANEL & FORM
+// ============================================================
+function bukaPanel(id) {
+  document.getElementById('panel-jastip').classList.remove('active');
+  document.getElementById(id).classList.add('active');
+  setTimeout(() => document.getElementById(id).scrollIntoView({ behavior: 'smooth' }), 150);
+}
+
+function validasi(id) {
+  const el = document.getElementById(id);
+  if (!el) return true;
+  const kosong = el.value.trim() === '';
+  el.classList.toggle('error', kosong);
+  el.addEventListener('input',  () => el.classList.remove('error'), { once: true });
+  el.addEventListener('change', () => el.classList.remove('error'), { once: true });
+  return !kosong;
+}
+
+let _pendingWALink = null;
+
+function kirimForm() {
+  // Validasi kategori
+  if (!kategoriDipilih) {
+    document.getElementById('opsi-makanan').classList.add('error-card');
+    document.getElementById('opsi-barang').classList.add('error-card');
+    document.getElementById('opsi-makanan').scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+
+  const valid = ['jas-nama','jas-wa','jas-kampung','jas-detail'].map(validasi);
+  if (valid.includes(false)) return;
+
+  const nama       = document.getElementById('jas-nama').value.trim();
+  const wa         = document.getElementById('jas-wa').value.trim();
+  const kecAsal    = document.getElementById('jas-kec-asal').value;
+  const desaAsal   = document.getElementById('jas-desa-asal').value;
+  const kecTujuan  = document.getElementById('jas-kec-tujuan').value;
+  const desaTujuan = document.getElementById('jas-desa-tujuan').value;
+  const kampung    = document.getElementById('jas-kampung').value.trim();
+  const detail     = document.getElementById('jas-detail').value.trim();
+  const km         = document.getElementById('lbl-km').textContent;
+  const total      = document.getElementById('lbl-total').textContent;
+  const katLabel   = kategoriDipilih === 'makanan' ? '🍱 Jastip Makanan' : '📦 Jastip Barang';
+
+  const teks =
+    `*PESANAN BARU — TITIP.ID*\n\n` +
+    `👤 Nama: ${nama}\n📱 WA: ${wa}\n\n` +
+    `🗂️ Kategori: ${katLabel}\n` +
+    `📍 Asal: ${desaAsal}, Kec. ${kecAsal}\n` +
+    `🎯 Tujuan: ${desaTujuan}, Kec. ${kecTujuan}\n` +
+    `🗺️ Kampung/RT/RW: ${kampung}\n` +
+    `📏 Jarak: ${km}\n\n` +
+    `📝 Detail Titipan:\n${detail}\n\n` +
+    `💰 Estimasi Total: ${total}\n` +
+    `_(Harga final dikonfirmasi admin sebelum belanja)_`;
+
+  const isAldi = ['Wanayasa','Kiarapedes'].includes(kecTujuan);
+  const nomor  = isAldi ? "6285860605658" : "6281973941213";
+
+  document.getElementById('modal-nama-admin').textContent  = isAldi ? "Aldi Rizaldi" : "Aep Mulyana";
+  document.getElementById('modal-zona-admin').textContent  = isAldi ? "Wilayah: Wanayasa & Kiarapedes" : "Wilayah: Bojong, Darangdan & Sekitarnya";
+  document.getElementById('modal-nomor-admin').textContent = '📞 ' + (isAldi ? "0858-6060-5658" : "0819-7394-1213");
+
+  const enc = encodeURIComponent(teks);
+  const isAndroid = /android/i.test(navigator.userAgent);
+  _pendingWALink = isAndroid
+    ? `intent://send?phone=${nomor}&text=${enc}#Intent;scheme=whatsapp;package=com.whatsapp;end`
+    : `https://api.whatsapp.com/send?phone=${nomor}&text=${enc}`;
+
+  document.getElementById('modal-gateway').classList.add('active');
+}
+
+function lanjutKeWA() {
+  if (_pendingWALink) {
+    if (/android/i.test(navigator.userAgent)) window.location.href = _pendingWALink;
+    else window.open(_pendingWALink, '_blank');
+    _pendingWALink = null;
+    tutupModal();
+  }
+}
+
+function tutupModal() {
+  document.getElementById('modal-gateway').classList.remove('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
